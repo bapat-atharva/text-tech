@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0"
+         datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+    <start>
+        <element name="books">
+            <oneOrMore>
+                <element name="book">
+                    <element name="title">
+                        <text/>
+                    </element>
+                    <element name="price">
+                        <text/>
+                    </element>
+                    <element name="rating">
+                        <text/>
+                    </element>
+                    <element name="availability">
+                        <text/>
+                    </element>
+                    <element name="image-url">
+                        <data type="anyURI"/>
+                    </element>
+                    <element name="product-url">
+                        <data type="anyURI"/>
+                    </element>
+                    <element name="category">
+                        <text/>
+                    </element>
+                </element>
+            </oneOrMore>
+        </element>
+    </start>
+</grammar>
