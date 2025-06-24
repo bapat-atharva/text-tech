@@ -68,7 +68,7 @@ class BookScraper:
                     if len(books_data) >= limit:
                         break
                         
-                    product_url = self.base_url + "catalogue/" + book.select_one('h3 a')['href'].replace('../', '')
+                    product_url = self.base_url + "catalogue/" + book.select_one('h3 a')['href'].replace('../', '').replace("catalogue", "")
                     book_data = {
                         "title": book.h3.a['title'],
                         "price": book.select_one('p.price_color').text.strip(),
@@ -114,28 +114,36 @@ class BookScraper:
             xml_string = parseString(xml_data).toprettyxml()
 
             # Create database
-            self.basex.client.execute("DROP DB IF EXISTS BookCatalog")
-            self.basex.client.create("BookCatalog", xml_string)
+            self.basex.client.execute("drop db BookCatalog")
+
+            self.basex.client.execute("create db BookCatalog " + xml_string)
+
+
             return True
 
         except Exception as e:
             st.error(f"BaseX Store Error: {e}")
             return False
         finally:
-            self.basex.close()
+            # self.basex.close()
+            pass
 
     def query_books(self, query_string):
         if not self.basex.connect():
             return []
+        
+        self.basex.client.execute("open BookCatalog")
 
         try:
-            result = self.basex.client.execute(f"XQUERY {query_string}")
-            return result.split('\n') if result else []
+            print(query_string)
+            result = self.basex.client.query(query_string)
+            return result
         except Exception as e:
             st.error(f"Query Error: {e}")
             return []
         finally:
-            self.basex.close()
+            # self.basex.close()
+            pass
 
 def main():
     st.set_page_config(page_title="Book Scraper with BaseX", layout="wide")
@@ -145,7 +153,7 @@ def main():
 
     with st.sidebar:
         st.header("Configuration")
-        book_limit = st.slider("Number of books to scrape:", 1, 200, 50)
+        book_limit = st.slider("Number of books to scrape:", 1, 200, 10)
         st.info("BaseX Connection Settings")
         st.code(f"Host: {BASEX_CONFIG['host']}\nPort: {BASEX_CONFIG['port']}")
 
@@ -162,29 +170,32 @@ def main():
                     st.error("❌ Failed to store in BaseX")
 
     with col2:
-        if st.button("📊 Run Sample Queries") and st.session_state.get('has_data'):
+        if st.button("📊 Run Sample Queries"):# and st.session_state.get('has_data'):
             queries = {
                 "Books under £15": """
-                    for $b in /books/book
-                    where number(translate($b/price, '£', '')) < 15
-                    return concat($b/title/text(), ' (', $b/price/text(), ')')
+                    for $b in /books/item
+        where number(substring-after($b/price, '£')) < 50
+        return data($b/title/text())
                 """,
                 "Books by Category": """
-                    for $c in distinct-values(/books/book/category)
-                    return concat($c, ': ', count(/books/book[category=$c]))
+                    for $c in distinct-values(/books/item/category)
+                    return concat($c, ': ', count(/books/item[category=$c]))
                 """,
                 "Top Rated Books": """
-                    for $b in /books/book[rating='Five']
+                    for $b in /books/item[rating='Five']
                     return concat($b/title/text(), ' (', $b/rating/text(), ' stars)')
                 """
             }
 
+            # a = BaseXClient.Session('localhost', 1984, 'admin', 'admin')
+
             for name, query in queries.items():
                 st.subheader(name)
+
                 results = scraper.query_books(query)
-                for result in results:
-                    if result.strip():
-                        st.write(f"• {result}")
+                for typecode, item in results.iter():
+                    print("item=%s" % str(item))
+                    st.write(f"• {str(item)}")
 
 if __name__ == "__main__":
     main()
