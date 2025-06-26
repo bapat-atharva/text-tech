@@ -1,5 +1,5 @@
 import streamlit as st
-import json
+import os
 import requests
 from bs4 import BeautifulSoup
 from dicttoxml import dicttoxml
@@ -41,6 +41,38 @@ class BookScraper:
     def __init__(self):
         self.base_url = "https://books.toscrape.com/"
         self.basex = BaseXConnection()
+
+    def validate_xml(self, xml_file: str, schema_file: str = "./books_schema.rng") -> bool:
+        """
+        Validate XML against RelaxNG schema
+        Returns True if valid, False otherwise
+        """
+        try:
+            if not os.path.exists(schema_file):
+                raise FileNotFoundError(f"Schema file not found: {schema_file}")
+                
+            # Parse the XML file and schema
+            xml_doc = etree.fromstring(xml_file)
+            # with open("aa.xml", "w") as f:
+            #     f.write(xml_file)
+
+            relaxng_doc = etree.RelaxNG(etree.parse(schema_file))
+                
+            # Validate and return result
+            is_valid = relaxng_doc.validate(xml_doc)
+            
+            if is_valid:
+                st.success("✅ XML document is valid against the schema")
+            else:
+                st.success("❌ XML validation failed!")
+                for error in relaxng_doc.error_log:
+                    print(f"Line {error.line}: {error.message}")
+                
+            return is_valid
+            
+        except Exception as e:
+            print(f"Validation error: {str(e)}")
+            return False
 
     def scrape_books(self, limit=200):
         books_data = []
@@ -113,6 +145,8 @@ class BookScraper:
             xml_data = dicttoxml(books_data, custom_root='books', attr_type=False)
             xml_string = parseString(xml_data).toprettyxml()
 
+            self.validate_xml(xml_string)
+
             # Create database
             self.basex.client.execute("drop db BookCatalog")
 
@@ -135,7 +169,7 @@ class BookScraper:
         self.basex.client.execute("open BookCatalog")
 
         try:
-            print(query_string)
+            # print(query_string)
             result = self.basex.client.query(query_string)
             return result
         except Exception as e:
@@ -146,56 +180,58 @@ class BookScraper:
             pass
 
 def main():
-    st.set_page_config(page_title="Book Scraper with BaseX", layout="wide")
-    st.title("📚 Book Scraper with BaseX Integration")
+    try:
+        st.set_page_config(page_title="Book Scraper with BaseX", layout="wide")
+        st.title("📚 Book Scraper with BaseX Integration")
 
-    scraper = BookScraper()
+        scraper = BookScraper()
 
-    with st.sidebar:
-        st.header("Configuration")
-        book_limit = st.slider("Number of books to scrape:", 1, 200, 10)
-        st.info("BaseX Connection Settings")
-        st.code(f"Host: {BASEX_CONFIG['host']}\nPort: {BASEX_CONFIG['port']}")
+        with st.sidebar:
+            st.header("Configuration")
+            book_limit = st.slider("Number of books to scrape:", 1, 200, 10)
+            st.info("BaseX Connection Settings")
+            st.code(f"Host: {BASEX_CONFIG['host']}\nPort: {BASEX_CONFIG['port']}")
 
-    col1, col2 = st.columns([2, 1])
+        col1, col2 = st.columns([2, 1])
 
-    with col1:
-        if st.button("🔄 Scrape and Store Books"):
-            books_data = scraper.scrape_books(book_limit)
-            if books_data:
-                if scraper.store_in_basex(books_data):
-                    st.success("✅ Data stored in BaseX successfully!")
-                    st.session_state['has_data'] = True
-                else:
-                    st.error("❌ Failed to store in BaseX")
+        with col1:
+            if st.button("🔄 Scrape and Store Books"):
+                books_data = scraper.scrape_books(book_limit)
+                if books_data:
+                    if scraper.store_in_basex(books_data):
+                        st.success("✅ Data stored in BaseX successfully!")
+                        st.session_state['has_data'] = True
+                    else:
+                        st.error("❌ Failed to store in BaseX")
 
-    with col2:
-        if st.button("📊 Run Sample Queries"):# and st.session_state.get('has_data'):
-            queries = {
-                "Books under £15": """
-                    for $b in /books/item
-        where number(substring-after($b/price, '£')) < 50
-        return data($b/title/text())
-                """,
-                "Books by Category": """
-                    for $c in distinct-values(/books/item/category)
-                    return concat($c, ': ', count(/books/item[category=$c]))
-                """,
-                "Top Rated Books": """
-                    for $b in /books/item[rating='Five']
-                    return concat($b/title/text(), ' (', $b/rating/text(), ' stars)')
-                """
-            }
+        with col2:
+            if st.button("📊 Run Sample Queries"):# and st.session_state.get('has_data'):
+                queries = {
+                    "Books under £15": """
+                        for $b in /books/item
+            where number(substring-after($b/price, '£')) < 50
+            return data($b/title/text())
+                    """,
+                    "Books by Category": """
+                        for $c in distinct-values(/books/item/category)
+                        return concat($c, ': ', count(/books/item[category=$c]))
+                    """,
+                    "Top Rated Books": """
+                        for $b in /books/item[rating='Five']
+                        return concat($b/title/text(), ' (', $b/rating/text(), ' stars)')
+                    """
+                }
 
-            # a = BaseXClient.Session('localhost', 1984, 'admin', 'admin')
+                # a = BaseXClient.Session('localhost', 1984, 'admin', 'admin')
 
-            for name, query in queries.items():
-                st.subheader(name)
+                for name, query in queries.items():
+                    st.subheader(name)
 
-                results = scraper.query_books(query)
-                for typecode, item in results.iter():
-                    print("item=%s" % str(item))
-                    st.write(f"• {str(item)}")
-
+                    results = scraper.query_books(query)
+                    for typecode, item in results.iter():
+                        print("item=%s" % str(item))
+                        st.write(f"• {str(item)}")
+    finally:
+        scraper.basex.close()
 if __name__ == "__main__":
     main()
