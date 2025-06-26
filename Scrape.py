@@ -209,8 +209,8 @@ def main():
                 queries = {
                     "Books under £15": """
                         for $b in /books/item
-            where number(substring-after($b/price, '£')) < 50
-            return data($b/title/text())
+                        where number(substring-after($b/price, '£')) < 50
+                        return data($b/title/text())
                     """,
                     "Books by Category": """
                         for $c in distinct-values(/books/item/category)
@@ -222,14 +222,12 @@ def main():
                     """
                 }
 
-                # a = BaseXClient.Session('localhost', 1984, 'admin', 'admin')
-
                 for name, query in queries.items():
                     st.subheader(name)
 
                     results = scraper.query_books(query)
                     for typecode, item in results.iter():
-                        print("item=%s" % str(item))
+                        # print("item=%s" % str(item))
                         st.write(f"• {str(item)}")
     finally:
         scraper.basex.close()
