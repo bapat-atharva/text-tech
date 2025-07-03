@@ -7,6 +7,7 @@ from xml.dom.minidom import parseString
 from lxml import etree
 from BaseXClient import BaseXClient
 import time
+from huggingface_hub import InferenceClient
 
 # Configuration
 BASEX_CONFIG = {
@@ -15,7 +16,7 @@ BASEX_CONFIG = {
     "user": "admin",
     "password": "admin"
 }
-
+HF_API_TOKEN = os.getenv("HF_API_TOKEN")
 class BaseXConnection:
     def __init__(self):
         self.client = None
@@ -178,6 +179,62 @@ class BookScraper:
         finally:
             # self.basex.close()
             pass
+    def nlp_to_xquery(self, nlp_query):
+        """Convert natural language query to XQuery using Hugging Face"""
+        if not HF_API_TOKEN:
+            st.error("Hugging Face API token is not set. Please set HF_API_TOKEN environment variable.")
+            return None
+
+        try:
+            client = InferenceClient(token=HF_API_TOKEN)
+            
+            prompt = f"""
+            Convert the following natural language query about books into valid XQuery 3.1:
+            The XML structure has books at path '/books/item' with these child elements:
+            - title
+            - price (format: £XX.XX)
+            - rating (values: One, Two, Three, Four, Five)
+            - availability
+            - image_url
+            - product_url
+            - category
+            
+            Query: "{nlp_query}"
+            
+            Return ONLY the XQuery code without any additional explanation or formatting.
+            Make sure the query:
+            1. Starts with 'xquery version "3.1";'
+            2. Uses proper string manipulation for price comparisons
+            3. Handles categories as strings
+            4. Returns meaningful results with element names
+            
+            Example response for 'books under £15':
+            xquery version "3.1";
+            for $book in /books/item
+            where number(substring($book/price, 2)) < 15
+            return $book/title
+            """
+            
+            response = client.text_generation(
+                prompt=prompt,
+                model="HuggingFaceH4/starchat-beta",
+                max_new_tokens=256,
+                temperature=0.1,
+                stop_sequences=["<|end|>"]
+            )
+            
+            # Clean up the response
+            xquery = response.strip()
+            if "```xquery" in xquery:
+                xquery = xquery.split("```xquery")[1].split("```")[0].strip()
+            elif "```" in xquery:
+                xquery = xquery.split("```")[1].split("```")[0].strip()
+                
+            return xquery
+            
+        except Exception as e:
+            st.error(f"LLM Conversion Error: {e}")
+            return None
 
 def main():
     try:
@@ -192,6 +249,29 @@ def main():
             st.info("BaseX Connection Settings")
             st.code(f"Host: {BASEX_CONFIG['host']}\nPort: {BASEX_CONFIG['port']}")
 
+            # NLP to XQuery section
+            st.subheader("Natural Language Query")
+            nlp_query = st.text_input("Ask about books in natural language:")
+            if st.button("Convert & Run"):
+                if nlp_query:
+                    with st.spinner("Converting to XQuery..."):
+                        xquery = scraper.nlp_to_xquery(nlp_query)
+                        
+                    if xquery:
+                        st.subheader("Generated XQuery:")
+                        st.code(xquery, language="xquery")
+                        
+                        with st.spinner("Running query..."):
+                            results = scraper.query_books(xquery)
+                            
+                        st.subheader("Results:")
+                        if results:
+                            for item in results:
+                                st.write(f"- {item}")
+                        else:
+                            st.info("No results found")
+                else:
+                    st.warning("Please enter a query")
         col1, col2 = st.columns([2, 1])
 
         with col1:
@@ -226,7 +306,7 @@ def main():
                     st.subheader(name)
 
                     results = scraper.query_books(query)
-                    for typecode, item in results.iter():
+                    for item in results:
                         # print("item=%s" % str(item))
                         st.write(f"• {str(item)}")
     finally:
