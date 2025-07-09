@@ -7,7 +7,7 @@ from xml.dom.minidom import parseString
 from lxml import etree
 from BaseXClient import BaseXClient
 import time
-from huggingface_hub import InferenceClient
+from transformers import pipeline
 
 # Configuration
 BASEX_CONFIG = {
@@ -179,15 +179,76 @@ class BookScraper:
         finally:
             # self.basex.close()
             pass
+    # def nlp_to_xquery(self, nlp_query):
+    #     """Convert natural language query to XQuery using Hugging Face"""
+    #     if not HF_API_TOKEN:
+    #         st.error("Hugging Face API token is not set. Please set HF_API_TOKEN environment variable.")
+    #         return None
+
+    #     try:
+    #         client = InferenceClient(token=HF_API_TOKEN)
+            
+    #         prompt = f"""
+    #         Convert the following natural language query about books into valid XQuery 3.1:
+    #         The XML structure has books at path '/books/item' with these child elements:
+    #         - title
+    #         - price (format: £XX.XX)
+    #         - rating (values: One, Two, Three, Four, Five)
+    #         - availability
+    #         - image_url
+    #         - product_url
+    #         - category
+            
+    #         Query: "{nlp_query}"
+            
+    #         Return ONLY the XQuery code without any additional explanation or formatting.
+    #         Make sure the query:
+    #         1. Starts with 'xquery version "3.1";'
+    #         2. Uses proper string manipulation for price comparisons
+    #         3. Handles categories as strings
+    #         4. Returns meaningful results with element names
+            
+    #         Example response for 'books under £15':
+    #         xquery version "3.1";
+    #         for $book in /books/item
+    #         where number(substring($book/price, 2)) < 15
+    #         return $book/title
+    #         """
+            
+    #         response = client.text_generation(
+    #             prompt=prompt,
+    #             model="HuggingFaceH4/starchat-beta",
+    #             max_new_tokens=256,
+    #             temperature=0.1,
+    #             stop_sequences=["<|end|>"]
+    #         )
+            
+    #         # Clean up the response
+    #         xquery = response.strip()
+    #         if "```xquery" in xquery:
+    #             xquery = xquery.split("```xquery")[1].split("```")[0].strip()
+    #         elif "```" in xquery:
+    #             xquery = xquery.split("```")[1].split("```")[0].strip()
+                
+    #         return xquery
+            
+    #     except Exception as e:
+    #         st.error(f"LLM Conversion Error: {e}")
+    #         return None
+
     def nlp_to_xquery(self, nlp_query):
-        """Convert natural language query to XQuery using Hugging Face"""
         if not HF_API_TOKEN:
             st.error("Hugging Face API token is not set. Please set HF_API_TOKEN environment variable.")
             return None
 
         try:
-            client = InferenceClient(token=HF_API_TOKEN)
-            
+            # Load the model pipeline
+            generator = pipeline(
+                "text-generation",
+                model="HuggingFaceH4/starchat-beta",
+                token="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"
+            )
+
             prompt = f"""
             Convert the following natural language query about books into valid XQuery 3.1:
             The XML structure has books at path '/books/item' with these child elements:
@@ -198,43 +259,99 @@ class BookScraper:
             - image_url
             - product_url
             - category
-            
+
             Query: "{nlp_query}"
-            
+
             Return ONLY the XQuery code without any additional explanation or formatting.
             Make sure the query:
             1. Starts with 'xquery version "3.1";'
             2. Uses proper string manipulation for price comparisons
             3. Handles categories as strings
             4. Returns meaningful results with element names
-            
+
             Example response for 'books under £15':
             xquery version "3.1";
             for $book in /books/item
             where number(substring($book/price, 2)) < 15
             return $book/title
             """
-            
-            response = client.text_generation(
-                prompt=prompt,
-                model="HuggingFaceH4/starchat-beta",
-                max_new_tokens=256,
-                temperature=0.1,
-                stop_sequences=["<|end|>"]
-            )
-            
+
+            # Generate the response
+            results = generator(prompt, max_new_tokens=256, temperature=0.1)
+            xquery = results[0]['generated_text'].strip()
+
             # Clean up the response
-            xquery = response.strip()
             if "```xquery" in xquery:
                 xquery = xquery.split("```xquery")[1].split("```")[0].strip()
             elif "```" in xquery:
                 xquery = xquery.split("```")[1].split("```")[0].strip()
-                
+
             return xquery
-            
+
         except Exception as e:
             st.error(f"LLM Conversion Error: {e}")
             return None
+
+    def visualize_category_rating_from_basex(self, host='localhost', port=1984, username='admin', password='admin', db_name='books_db'):
+        """
+        Connects to BaseX, runs an XQuery to extract <category, rating> pairs,
+        aggregates the data, and visualizes it as a grouped bar chart using Plotly.
+        """
+
+        if not self.basex.connect():
+            return []
+        
+        self.basex.client.execute("open BookCatalog")
+
+        # # --- 1. Connect to BaseX ---
+        # try:
+        #     session = Session(host, port, username, password)
+        #     session.execute(f"open {db_name}")
+        # except Exception as e:
+        #     print(f"❌ Connection failed: {e}")
+        #     return
+
+        # --- 2. XQuery to extract category and rating ---
+        xquery = """
+        for $b in /books/item
+        return concat($b/category, ",", $b/rating)
+        """
+
+        try:
+            raw_result = self.basex.client.query(xquery).execute()
+            lines = raw_result.strip().split('\n')
+        except Exception as e:
+            print(f"❌ XQuery failed: {e}")
+            return
+
+        # --- 3. Convert to DataFrame ---
+        data = [line.strip().split(',') for line in lines if ',' in line]
+        df = pd.DataFrame(data, columns=['category', 'rating'])
+
+        # --- 4. Optional: Order ratings ---
+        rating_order = ['One', 'Two', 'Three', 'Four', 'Five']
+        df['rating'] = pd.Categorical(df['rating'], categories=rating_order, ordered=True)
+
+        # --- 5. Group and count ---
+        grouped = df.groupby(['category', 'rating']).size().reset_index(name='count')
+
+        # --- 6. Visualize using Plotly ---
+        fig = px.bar(
+            grouped,
+            x='category',
+            y='count',
+            color='rating',
+            barmode='group',
+            title='Books per Category and Rating',
+            labels={'count': 'Number of Books'}
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+
+
+import pandas as pd
+import plotly.express as px
 
 def main():
     try:
@@ -281,6 +398,7 @@ def main():
                     if scraper.store_in_basex(books_data):
                         st.success("✅ Data stored in BaseX successfully!")
                         st.session_state['has_data'] = True
+                        scraper.visualize_category_rating_from_basex()
                     else:
                         st.error("❌ Failed to store in BaseX")
 

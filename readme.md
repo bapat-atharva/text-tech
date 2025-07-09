@@ -6,7 +6,7 @@
 
 **Install libraries:**
 
-pip install beautifulsoup4 BaseXClient lxml streamlit
+pip install beautifulsoup4 BaseXClient lxml streamlit huggingface_hub
 
 **Steps:**
 
