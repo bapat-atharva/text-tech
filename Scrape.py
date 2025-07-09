@@ -424,8 +424,9 @@ def main():
                     st.subheader(name)
 
                     results = scraper.query_books(query)
-                    for item in results:
-                        # print("item=%s" % str(item))
+                    for typecode, item in results.iter():
+                        # print("typecode=%d" % typecode)
+                        print("item=%s" % str(item))
                         st.write(f"• {str(item)}")
     finally:
         scraper.basex.close()
