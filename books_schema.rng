@@ -4,7 +4,7 @@
     <start>
         <element name="books">
             <oneOrMore>
-                <element name="book">
+                <element name="item">
                     <element name="title">
                         <text/>
                     </element>
@@ -17,10 +17,10 @@
                     <element name="availability">
                         <text/>
                     </element>
-                    <element name="image-url">
+                    <element name="image_url">
                         <data type="anyURI"/>
                     </element>
-                    <element name="product-url">
+                    <element name="product_url">
                         <data type="anyURI"/>
                     </element>
                     <element name="category">
