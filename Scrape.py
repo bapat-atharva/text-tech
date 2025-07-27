@@ -259,8 +259,10 @@ def main():
                             results = scraper.query_books(xquery)
                         st.subheader("Results:")
                         if results:
-                            for item in results:
-                                st.write(f"- {item}")
+                            for typecode, item in results.iter():
+                                # print("typecode=%d" % typecode)
+                                print("item=%s" % str(item))
+                                st.write(f"• {str(item)}")
                         else:
                             st.info("No results found")
                 else:

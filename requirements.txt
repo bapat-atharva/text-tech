@@ -1,0 +1,9 @@
+beautifulsoup4
+BaseXClient
+lxml
+streamlit
+huggingface_hub
+plotly
+dicttoxml
+pandas
+plotly

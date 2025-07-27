@@ -1,0 +1,147 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<books>
+	<item>
+		<title>A Light in the Attic</title>
+		<price>£51.77</price>
+		<rating>Three</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/2c/da/2cdad67c44b002e7ead0cc35693c0e8b.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//a-light-in-the-attic_1000/index.html</product_url>
+		<category>Poetry</category>
+	</item>
+	<item>
+		<title>Tipping the Velvet</title>
+		<price>£53.74</price>
+		<rating>One</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/26/0c/260c6ae16bce31c8f8c95daddd9f4a1c.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//tipping-the-velvet_999/index.html</product_url>
+		<category>Historical Fiction</category>
+	</item>
+	<item>
+		<title>Soumission</title>
+		<price>£50.10</price>
+		<rating>One</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/3e/ef/3eef99c9d9adef34639f510662022830.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//soumission_998/index.html</product_url>
+		<category>Fiction</category>
+	</item>
+	<item>
+		<title>Sharp Objects</title>
+		<price>£47.82</price>
+		<rating>Four</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/32/51/3251cf3a3412f53f339e42cac2134093.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//sharp-objects_997/index.html</product_url>
+		<category>Mystery</category>
+	</item>
+	<item>
+		<title>Sapiens: A Brief History of Humankind</title>
+		<price>£54.23</price>
+		<rating>Five</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/be/a5/bea5697f2534a2f86a3ef27b5a8c12a6.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//sapiens-a-brief-history-of-humankind_996/index.html</product_url>
+		<category>History</category>
+	</item>
+	<item>
+		<title>The Requiem Red</title>
+		<price>£22.65</price>
+		<rating>One</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/68/33/68339b4c9bc034267e1da611ab3b34f8.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//the-requiem-red_995/index.html</product_url>
+		<category>Young Adult</category>
+	</item>
+	<item>
+		<title>The Dirty Little Secrets of Getting Your Dream Job</title>
+		<price>£33.34</price>
+		<rating>Four</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/92/27/92274a95b7c251fea59a2b8a78275ab4.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//the-dirty-little-secrets-of-getting-your-dream-job_994/index.html</product_url>
+		<category>Business</category>
+	</item>
+	<item>
+		<title>The Coming Woman: A Novel Based on the Life of the Infamous Feminist, Victoria Woodhull</title>
+		<price>£17.93</price>
+		<rating>Three</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/3d/54/3d54940e57e662c4dd1f3ff00c78cc64.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//the-coming-woman-a-novel-based-on-the-life-of-the-infamous-feminist-victoria-woodhull_993/index.html</product_url>
+		<category>Default</category>
+	</item>
+	<item>
+		<title>The Boys in the Boat: Nine Americans and Their Epic Quest for Gold at the 1936 Berlin Olympics</title>
+		<price>£22.60</price>
+		<rating>Four</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/66/88/66883b91f6804b2323c8369331cb7dd1.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//the-boys-in-the-boat-nine-americans-and-their-epic-quest-for-gold-at-the-1936-berlin-olympics_992/index.html</product_url>
+		<category>Default</category>
+	</item>
+	<item>
+		<title>The Black Maria</title>
+		<price>£52.15</price>
+		<rating>One</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/58/46/5846057e28022268153beff6d352b06c.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//the-black-maria_991/index.html</product_url>
+		<category>Poetry</category>
+	</item>
+	<item>
+		<title>Starving Hearts (Triangular Trade Trilogy, #1)</title>
+		<price>£13.99</price>
+		<rating>Two</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/be/f4/bef44da28c98f905a3ebec0b87be8530.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//starving-hearts-triangular-trade-trilogy-1_990/index.html</product_url>
+		<category>Default</category>
+	</item>
+	<item>
+		<title>Shakespeare's Sonnets</title>
+		<price>£20.66</price>
+		<rating>Four</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/10/48/1048f63d3b5061cd2f424d20b3f9b666.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//shakespeares-sonnets_989/index.html</product_url>
+		<category>Poetry</category>
+	</item>
+	<item>
+		<title>Set Me Free</title>
+		<price>£17.46</price>
+		<rating>Five</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/5b/88/5b88c52633f53cacf162c15f4f823153.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//set-me-free_988/index.html</product_url>
+		<category>Young Adult</category>
+	</item>
+	<item>
+		<title>Scott Pilgrim's Precious Little Life (Scott Pilgrim #1)</title>
+		<price>£52.29</price>
+		<rating>Five</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/94/b1/94b1b8b244bce9677c2f29ccc890d4d2.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//scott-pilgrims-precious-little-life-scott-pilgrim-1_987/index.html</product_url>
+		<category>Sequential Art</category>
+	</item>
+	<item>
+		<title>Rip it Up and Start Again</title>
+		<price>£35.02</price>
+		<rating>Five</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/81/c4/81c4a973364e17d01f217e1188253d5e.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//rip-it-up-and-start-again_986/index.html</product_url>
+		<category>Music</category>
+	</item>
+	<item>
+		<title>Our Band Could Be Your Life: Scenes from the American Indie Underground, 1981-1991</title>
+		<price>£57.25</price>
+		<rating>Three</rating>
+		<availability>In stock</availability>
+		<image_url>https://books.toscrape.com/media/cache/54/60/54607fe8945897cdcced0044103b10b6.jpg</image_url>
+		<product_url>https://books.toscrape.com/catalogue//our-band-could-be-your-life-scenes-from-the-american-indie-underground-1981-1991_985/index.html</product_url>
+		<category>Music</category>
+	</item>
+</books>
